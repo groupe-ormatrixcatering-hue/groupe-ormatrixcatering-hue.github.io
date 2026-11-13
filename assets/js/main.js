@@ -6,6 +6,9 @@
   var STAGGER_MAX = 5;
 
   var OM = window.OM = window.OM || {};
+  var ROOT = window.OM_ROOT || '';
+  var I = OM.I18N || {};
+  var RTL = document.documentElement.dir === 'rtl';
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,7 +43,7 @@
     nav.classList.toggle('is-open', open);
     header.classList.toggle('menu-open', open);
     burger.setAttribute('aria-expanded', String(open));
-    burger.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+    burger.setAttribute('aria-label', open ? I.menuClose : I.menuOpen);
     document.body.style.overflow = open ? 'hidden' : '';
   };
   burger.addEventListener('click', function () { setMenu(!nav.classList.contains('is-open')); });
@@ -117,8 +120,8 @@
   document.addEventListener('keydown', function (e) {
     if (!lb.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') step(-1);
-    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(RTL ? 1 : -1);
+    if (e.key === 'ArrowRight') step(RTL ? -1 : 1);
   });
   var touchX = null;
   lb.addEventListener('touchstart', function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
@@ -126,7 +129,7 @@
     if (touchX === null) return;
     var dx = e.changedTouches[0].clientX - touchX;
     touchX = null;
-    if (Math.abs(dx) > SWIPE_PX) step(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > SWIPE_PX) step((dx < 0 ? 1 : -1) * (RTL ? -1 : 1));
   }, { passive: true });
 
   // Home page: open the lightbox from a group of zoomable photos / video tiles
@@ -134,8 +137,8 @@
     if (el.dataset.video) {
       return {
         type: 'video',
-        src: 'assets/video/' + el.dataset.video + '.mp4',
-        poster: 'assets/video/' + el.dataset.video + '.jpg',
+        src: ROOT + 'assets/video/' + el.dataset.video + '.mp4',
+        poster: ROOT + 'assets/video/' + el.dataset.video + '.jpg',
         alt: el.getAttribute('aria-label') || ''
       };
     }
@@ -166,17 +169,17 @@
         f.classList.toggle('is-invalid', bad);
         if (bad) ok = false;
       });
-      if (!ok) { note.textContent = 'Merci de renseigner votre prénom, votre nom et votre téléphone.'; return null; }
+      if (!ok) { note.textContent = I.formError; return null; }
       var d = form.elements;
       return {
-        subject: 'Demande de devis : ' + d.service.value,
+        subject: I.subject + d.service.value,
         body: [
-          'Nom : ' + d.prenom.value.trim() + ' ' + d.nom.value.trim(),
-          'Téléphone : ' + d.tel.value.trim(),
-          'E-mail : ' + (d.email.value.trim() || 'non renseigné'),
-          'Service : ' + d.service.value,
-          'Date souhaitée : ' + (d.date.value || 'à préciser'),
-          (d.invites.dataset.label || 'Quantité') + ' : ' + (d.invites.value.trim() || 'à préciser'),
+          I.lName + d.prenom.value.trim() + ' ' + d.nom.value.trim(),
+          I.lPhone + d.tel.value.trim(),
+          I.lEmail + (d.email.value.trim() || I.notGiven),
+          I.lService + d.service.value,
+          I.lDate + (d.date.value || I.toSpecify),
+          (d.invites.dataset.label || I.lQty) + I.colon + (d.invites.value.trim() || I.toSpecify),
           '',
           d.message.value.trim()
         ].join('\n')
@@ -190,16 +193,16 @@
       e.preventDefault();
       var req = buildRequest();
       if (!req || !waNumber) return;
-      var text = 'Bonjour Or Matrix,\n' + req.subject + '\n\n' + req.body;
+      var text = I.greeting + '\n' + req.subject + '\n\n' + req.body;
       window.open('https://wa.me/' + waNumber + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
-      note.textContent = "WhatsApp s'ouvre avec votre demande. Il vous reste à appuyer sur Envoyer.";
+      note.textContent = I.waOpened;
     });
     var mailBtn = $('[data-mail]', form);
     if (mailBtn) mailBtn.addEventListener('click', function () {
       var req = buildRequest();
       if (!req) return;
       window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(req.subject) + '&body=' + encodeURIComponent(req.body);
-      note.textContent = "Votre messagerie s'ouvre avec la demande prête à envoyer.";
+      note.textContent = I.mailOpened;
     });
   }
 

@@ -503,3 +503,51 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-o
 .collab-points li { padding-left: 1.4rem; position: relative; }
 .collab-points li::before { content: ""; position: absolute; left: 0; top: .6em; width: .6rem; height: .6rem; border-radius: 50%; background: var(--red); }
 @media (max-width: 760px) { .collab-card { grid-template-columns: 1fr; } .collab-logos img { width: 104px; height: 104px; } }
+
+/* ===== Sélecteur de langue (FR / EN / عربي) ===== */
+.lang-switch { display: inline-flex; align-items: center; gap: .15rem; padding: .18rem; border: 1.5px solid rgba(255,255,255,.55); border-radius: 999px; transition: border-color .3s; }
+.nav .lang-switch a:not(.btn) { padding: .28rem .65rem; font-size: .72rem; letter-spacing: .04em; text-transform: none; border-radius: 999px; color: #fff; line-height: 1.3; }
+.nav .lang-switch a:not(.btn):not(.nav-pill)::after { display: none; }
+.is-scrolled .lang-switch, .header-solid .lang-switch, .menu-open .lang-switch { border-color: var(--line); }
+.is-scrolled .nav .lang-switch a:not(.btn), .header-solid .nav .lang-switch a:not(.btn), .menu-open .nav .lang-switch a:not(.btn) { color: var(--ink); }
+.nav .lang-switch a[aria-current] { background: var(--red); color: #fff !important; }
+@media (max-width: 960px) { .nav .lang-switch a:not(.btn) { font-size: .95rem; padding: .4rem .9rem; } }
+
+/* ===== Arabe : mise en page de droite à gauche ===== */
+html[dir="rtl"] { --f-display: "Cairo", "Segoe UI", Tahoma, sans-serif; --f-sans: "Cairo", "Segoe UI", Tahoma, sans-serif; }
+html[dir="rtl"] body { line-height: 1.85; }
+/* l'écriture arabe est cursive : pas d'espacement entre lettres, pas de majuscules, pas d'italique */
+html[dir="rtl"] *, html[dir="rtl"] *::before, html[dir="rtl"] *::after { letter-spacing: normal !important; text-transform: none !important; }
+html[dir="rtl"] em, html[dir="rtl"] h1 em, html[dir="rtl"] h2 em { font-style: normal; }
+html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3 { line-height: 1.3; }
+html[dir="rtl"] .hero h1, html[dir="rtl"] .s-hero h1 { max-width: 18ch; }
+/* numéros et adresses e-mail restent lisibles de gauche à droite */
+html[dir="rtl"] a[href^="tel:"], html[dir="rtl"] a[href^="mailto:"], html[dir="rtl"] .btn-wa { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] .contact-form input[type="tel"], html[dir="rtl"] .contact-form input[type="email"], html[dir="rtl"] .contact-form input[name="invites"] { direction: ltr; text-align: right; }
+/* éléments dessinés avec left / right */
+html[dir="rtl"] .eyebrow::before { transform-origin: right; }
+html[dir="rtl"] .progress { transform-origin: right; }
+html[dir="rtl"] .nav a:not(.btn):not(.nav-pill)::after { left: auto; right: 0; transform-origin: right; }
+html[dir="rtl"] .service-card::after { transform-origin: right; }
+html[dir="rtl"] .card-num { right: auto; left: .9rem; }
+html[dir="rtl"] .zoom::after { right: auto; left: 12px; }
+html[dir="rtl"] .check-list li { padding-left: 0; padding-right: 1.7rem; }
+html[dir="rtl"] .check-list li::before { left: auto; right: 0; }
+html[dir="rtl"] .collab-points li { padding-left: 0; padding-right: 1.4rem; }
+html[dir="rtl"] .collab-points li::before { left: auto; right: 0; }
+html[dir="rtl"] .panel-list li { padding-left: 0; padding-right: 1rem; border-left: 0; border-right: 3px solid var(--gold); }
+html[dir="rtl"] .order-box { border-left: 1px solid var(--cream-2); border-right: 4px solid var(--red); }
+html[dir="rtl"] .v-cap { text-align: right; }
+html[dir="rtl"] .filter sup { margin-left: 0; margin-right: .25rem; }
+html[dir="rtl"] .link-arrow::after { content: "←"; }
+html[dir="rtl"] .link-arrow:hover::after { transform: translateX(-6px); }
+html[dir="rtl"] .social-list a:hover { transform: translateX(-4px); }
+html[dir="rtl"] .fab-stack { right: auto; left: 16px; align-items: flex-end; }
+html[dir="rtl"] .lb-close { right: auto; left: 16px; }
+html[dir="rtl"] .lb-prev { left: auto; right: 16px; transform: translateY(-50%) scaleX(-1); }
+html[dir="rtl"] .lb-next { right: auto; left: 16px; transform: translateY(-50%) scaleX(-1); }
+/* défilement du bandeau et apparition des blocs dans le sens de lecture */
+html[dir="rtl"] .marquee-track { animation-name: marquee-rtl; }
+@keyframes marquee-rtl { to { transform: translateX(50%); } }
+html[dir="rtl"] .js [data-reveal="left"]:not(.is-in) { transform: translateX(46px); }
+html[dir="rtl"] .js [data-reveal="right"]:not(.is-in) { transform: translateX(-46px); }

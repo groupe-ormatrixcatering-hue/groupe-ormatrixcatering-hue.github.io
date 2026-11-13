@@ -2,24 +2,19 @@
   'use strict';
 
   var OM = window.OM;
+  var ROOT = window.OM_ROOT || '';
+  var I = (OM && OM.I18N) || {};
   var grid = document.getElementById('gallery');
   var bar = document.getElementById('filters');
   if (!OM || !grid || !bar) return;
 
-  var FILTERS = [
-    ['all', 'Tout'],
-    ['buffet', 'Réceptions & buffets'],
-    ['plats', 'Plats'],
-    ['lunch', 'Lunch box'],
-    ['douceurs', 'Entrées & douceurs'],
-    ['videos', 'Vidéos']
-  ];
+  var FILTERS = ['all', 'buffet', 'plats', 'lunch', 'douceurs', 'videos'].map(function (k) { return [k, I.filters[k]]; });
   var VIDEO_EVERY = 3;
 
   var videoItem = function (v) {
     return {
       type: 'video', cat: 'videos', alt: v[1],
-      src: 'assets/video/' + v[0] + '.mp4', poster: 'assets/video/' + v[0] + '.jpg'
+      src: ROOT + 'assets/video/' + v[0] + '.mp4', poster: ROOT + 'assets/video/' + v[0] + '.jpg'
     };
   };
 
@@ -27,7 +22,7 @@
   var items = [];
   var videoIndex = 0;
   OM.PHOTOS.forEach(function (p, i) {
-    items.push({ type: 'img', cat: p[1], alt: p[2], src: 'assets/img/' + p[0] + '.jpg' });
+    items.push({ type: 'img', cat: p[1], alt: p[2], src: ROOT + 'assets/img/' + p[0] + '.jpg' });
     if ((i + 1) % VIDEO_EVERY === 0 && videoIndex < OM.VIDEOS.length) {
       items.push(videoItem(OM.VIDEOS[videoIndex++]));
     }
@@ -42,7 +37,7 @@
     b.dataset.cat = it.cat;
     b.dataset.index = String(i);
     b.setAttribute('data-reveal', 'zoom');
-    b.setAttribute('aria-label', (it.type === 'video' ? 'Lire la vidéo : ' : 'Agrandir : ') + it.alt);
+    b.setAttribute('aria-label', (it.type === 'video' ? I.playPrefix : I.zoomPrefix) + it.alt);
     img.src = it.poster || it.src;
     img.alt = it.type === 'video' ? '' : it.alt;
     img.loading = 'lazy';
@@ -83,7 +78,7 @@
     buttons.forEach(function (b) {
       var active = b.dataset.filter === key;
       b.classList.toggle('is-active', active);
-      if (active) bar.scrollTo({ left: b.offsetLeft - (bar.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' });
+      if (active && b.scrollIntoView) b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     });
     tiles.forEach(function (t, i) {
       var hide = key !== 'all' && items[i].cat !== key;
