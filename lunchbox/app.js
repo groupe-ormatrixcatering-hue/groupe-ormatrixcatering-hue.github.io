@@ -5,6 +5,9 @@
   const Order = window.LunchOrder;
   const { el, setText, createSteps, createBox } = window.LunchComposer;
   const SENT_NOTICE = "WhatsApp s'ouvre avec votre commande : appuyez sur Envoyer.";
+  const EMAIL_NOTICE = "Votre messagerie s'ouvre avec la commande : appuyez sur Envoyer. Si rien ne s'ouvre, utilisez « Copier la commande ».";
+  const LONG_EMAIL_NOTICE = "Votre commande est longue : elle a été copiée. Collez-la dans l'e-mail, puis envoyez.";
+  const LONG_EMAIL_MANUAL_NOTICE = "Copiez le texte ci-dessous et collez-le dans l'e-mail.";
   const FIELDS = Object.keys(Order.LIMITS);
 
   const byId = (id) => document.getElementById(id);
@@ -113,14 +116,14 @@
 
   function renderTotals() {
     const total = Order.totalBoxes(state.lines);
-    const minimum = byId('order-minimum');
-    const message = Order.minimumMessage(state.lines);
+    const alert = byId('order-alert');
+    const message = Order.emptyOrderMessage(state.lines);
     byId('order-empty').hidden = state.lines.length > 0;
     const hasLines = state.lines.length > 0;
     setText(byId('order-total'), hasLines ? `Total : ${total} box` : '');
     setText(byId('order-price'), hasLines ? `Total indicatif : ${Order.formatPrice(Order.totalPrice(state.lines))}` : '');
-    setText(minimum, message);
-    if (!message) minimum.classList.remove('is-error');
+    setText(alert, message);
+    if (!message) alert.classList.remove('is-error');
   }
 
   /* Le champ n'est réécrit que si la quantité change : une saisie en cours n'est jamais remplacée. */
@@ -264,20 +267,29 @@
     commit(FIELDS.reduce((next, field) => Order.setDetail(next, field, form.elements[field].value), state));
     const errors = Order.validateOrder(state, Order.todayIso());
     FIELDS.forEach((field) => showFieldError(field, errors[field] || ''));
-    byId('order-minimum').classList.toggle('is-error', Boolean(errors.lines));
-    const first = errors.lines ? byId('order-minimum') : form.elements[FIELDS.find((field) => errors[field])];
+    byId('order-alert').classList.toggle('is-error', Boolean(errors.lines));
+    const first = errors.lines ? byId('order-alert') : form.elements[FIELDS.find((field) => errors[field])];
     if (first) first.focus();
     return !first;
   }
 
+  /* Affiche et sélectionne le texte, puis tente l'ancienne commande de copie. Renvoie vrai si elle réussit. */
   function copyManually(text) {
     const area = byId('copy-text');
     byId('copy-manual').hidden = false;
     area.value = text;
     area.focus();
     area.select();
-    const isCopied = document.execCommand('copy');
-    setText(byId('copy-status'), isCopied ? 'Commande copiée.' : 'Copie automatique impossible : le texte est sélectionné, copiez-le manuellement.');
+    return document.execCommand('copy');
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      return copyManually(text);
+    }
   }
 
   function sendOrder() {
@@ -286,15 +298,21 @@
     setText(byId('send-status'), SENT_NOTICE);
   }
 
+  /* La copie précède l'ouverture de la messagerie : la page doit encore avoir le focus pour écrire dans le presse-papiers. */
+  async function emailOrder() {
+    if (!checkOrder()) return;
+    const { url, textToCopy } = Order.prepareEmail(state);
+    let notice = EMAIL_NOTICE;
+    if (textToCopy !== null) notice = (await copyText(textToCopy)) ? LONG_EMAIL_NOTICE : LONG_EMAIL_MANUAL_NOTICE;
+    /* La cible _top fait partir le lien de la page principale, y compris depuis l'iframe du mode intégré. */
+    el('a', { href: url, target: '_top' }).click();
+    setText(byId('send-status'), notice);
+  }
+
   async function copyOrder() {
     if (!checkOrder()) return;
-    const text = Order.buildMessage(state);
-    try {
-      await navigator.clipboard.writeText(text);
-      setText(byId('copy-status'), 'Commande copiée.');
-    } catch (error) {
-      copyManually(text);
-    }
+    const isCopied = await copyText(Order.buildMessage(state));
+    setText(byId('copy-status'), isCopied ? 'Commande copiée.' : 'Copie automatique impossible : le texte est sélectionné, copiez-le manuellement.');
   }
 
   form.addEventListener('input', (event) => {
@@ -307,6 +325,7 @@
     event.preventDefault();
     requestOutput('send');
   });
+  byId('email').addEventListener('click', () => requestOutput('email'));
   byId('copy').addEventListener('click', () => requestOutput('copy'));
 
   /* ---------- Box en cours, pas encore dans la commande ---------- */
@@ -314,6 +333,10 @@
   const OUTPUTS = Object.freeze({
     send: {
       run: sendOrder, button: form.querySelector('.send'), anchor: form.querySelector('.send'),
+      status: 'send-status', skipLabel: 'Envoyer sans cette box', nextStep: 'envoyer',
+    },
+    email: {
+      run: emailOrder, button: byId('email'), anchor: byId('email'),
       status: 'send-status', skipLabel: 'Envoyer sans cette box', nextStep: 'envoyer',
     },
     copy: {
@@ -354,7 +377,7 @@
     if (!window.confirm('Commencer une nouvelle commande ? Vos compositions et vos coordonnées seront effacées.')) return;
     leaveEditing(Order.createState());
     fillForm();
-    byId('order-minimum').classList.remove('is-error');
+    byId('order-alert').classList.remove('is-error');
     goToComposer();
   });
 

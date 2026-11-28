@@ -212,7 +212,7 @@
         });
         const filled = chosenByCustomer.filter(({ id }) => values[id]).length;
         setText(name, values.box || 'Choisissez votre box');
-        setText(byId('box-progress'), `Votre box : ${filled} sur ${chosenByCustomer.length}`);
+        setText(byId('box-progress'), `Votre box : ${filled} choix sur ${chosenByCustomer.length}`);
         setText(byId('box-summary'), summary(values.box, values.plat, price));
         setText(byId('box-price'), price === null ? '' : `Prix de la box : ${Order.formatPrice(price)}`);
         setText(byId('box-total'), total > 0 ? `Dans votre commande : ${total} box` : '');

@@ -6,16 +6,18 @@
 }(typeof self !== 'undefined' ? self : this, function (Menu) {
   'use strict';
 
-  const MIN_TOTAL = 5;
   const QTY_MIN = 1;
   const QTY_MAX = 999;
-  const DEFAULT_QTY = 5;
+  const DEFAULT_QTY = 1;
   const MAX_LINES = 15;
   const MAX_ENTREES = Menu.sections.find((s) => s.id === 'entree').max;
   /* La version change avec le format des compositions : les anciens brouillons sont laissés de côté. */
   const STORAGE_KEY = 'tahraoui-lunchbox-brouillon-v2';
   const ESTIMATE_NOTICE = 'Le total est indicatif, confirmé avec le devis.';
   const WHATSAPP_NUMBER = '213564914203';
+  const ORDER_EMAIL = 'ormatrixeurl@gmail.com';
+  const MAILTO_MAX_LENGTH = 1900;
+  const PASTE_BODY = 'Collez ici le récapitulatif de votre commande, puis envoyez.';
   const LIMITS = Object.freeze({ societe: 60, contact: 60, telephone: 20, date: 10, lieu: 120, remarques: 300 });
   const MULTILINE_FIELD = 'remarques';
   const PHONE_PATTERN = /^0(?:[567]\d{8}|[234]\d{7})$/;
@@ -110,10 +112,7 @@
   const stepQuantity = (quantity, delta) => Math.min(QTY_MAX, Math.max(QTY_MIN, quantity + delta));
   const totalBoxes = (lines) => lines.reduce((sum, line) => sum + line.quantity, 0);
 
-  function minimumMessage(lines) {
-    const missing = MIN_TOTAL - totalBoxes(lines);
-    return missing > 0 ? `Ajoutez encore ${missing} box (minimum ${MIN_TOTAL}).` : '';
-  }
+  const emptyOrderMessage = (lines) => (lines.length === 0 ? 'Ajoutez au moins une box à votre commande.' : '');
 
   const emptyDetails = () => ({ societe: '', contact: '', telephone: '', date: '', lieu: '', remarques: '' });
 
@@ -237,28 +236,31 @@
   }
 
   function validateOrder(state, today) {
-    const minimum = minimumMessage(state.lines);
-    return { ...(minimum ? { lines: minimum } : {}), ...validateDetails(state.details, today) };
+    const empty = emptyOrderMessage(state.lines);
+    return { ...(empty ? { lines: empty } : {}), ...validateDetails(state.details, today) };
   }
 
-  /* ---------- Récapitulatif WhatsApp ---------- */
+  /* ---------- Récapitulatif : WhatsApp et e-mail ---------- */
 
-  function lineBlock(line, index) {
+  const whatsAppBold = (text) => `*${text}*`;
+  const noBold = (text) => text;
+
+  function lineBlock(line, index, bold) {
     const [box, ...others] = describeComposition(line.composition);
     return [
       '',
-      `*Composition ${index + 1} : ${line.quantity} box, ${box.value}*`,
+      bold(`Composition ${index + 1} : ${line.quantity} box, ${box.value}`),
       ...others.filter((part) => part.value).map((part) => `- ${part.label} : ${part.value}`),
       `Prix unitaire : ${formatPrice(unitPrice(line.composition))}`,
       `Sous-total : ${formatPrice(lineSubtotal(line))}`,
     ];
   }
 
-  function buildMessage(state) {
+  function composeSummary(state, bold) {
     const d = state.details;
     const notes = d.remarques.trim();
     return [
-      '*Commande de lunch box*',
+      bold('Commande de lunch box'),
       'Traiteur Tahraoui en collaboration avec Or Matrix',
       '',
       `Société : ${d.societe.trim()}`,
@@ -266,16 +268,31 @@
       `Téléphone : ${d.telephone.trim()}`,
       `Date de livraison souhaitée : ${formatDate(d.date)}`,
       `Lieu : ${d.lieu.trim()}`,
-      ...state.lines.flatMap(lineBlock),
+      ...state.lines.flatMap((line, index) => lineBlock(line, index, bold)),
       '',
-      `*Total : ${totalBoxes(state.lines)} box*`,
-      `*Total indicatif : ${formatPrice(totalPrice(state.lines))}*`,
+      bold(`Total : ${totalBoxes(state.lines)} box`),
+      bold(`Total indicatif : ${formatPrice(totalPrice(state.lines))}`),
       ESTIMATE_NOTICE,
       ...(notes ? ['', `Remarques : ${notes}`] : []),
     ].join('\n');
   }
 
+  const buildMessage = (state) => composeSummary(state, whatsAppBold);
   const buildWhatsAppUrl = (state) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildMessage(state))}`;
+
+  function buildMailtoUrl(state, body) {
+    const subject = `Commande de lunch box - ${state.details.societe.trim()}`;
+    return `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  /* Un lien trop long risque d'être tronqué : le récapitulatif est alors à copier (textToCopy) puis à coller. */
+  function prepareEmail(state) {
+    const summary = composeSummary(state, noBold);
+    /* Un corps d'e-mail attend des retours à la ligne CRLF. */
+    const url = buildMailtoUrl(state, summary.replace(/\n/g, '\r\n'));
+    if (url.length <= MAILTO_MAX_LENGTH) return { url, textToCopy: null };
+    return { url: buildMailtoUrl(state, PASTE_BODY), textToCopy: summary };
+  }
 
   /* ---------- Brouillon : toute donnée relue est revalidée contre le menu ---------- */
 
@@ -333,12 +350,12 @@
   }
 
   return Object.freeze({
-    MIN_TOTAL, QTY_MIN, QTY_MAX, DEFAULT_QTY, MAX_LINES, MAX_ENTREES, STORAGE_KEY, LIMITS, WHATSAPP_NUMBER,
+    QTY_MIN, QTY_MAX, DEFAULT_QTY, MAX_LINES, MAX_ENTREES, STORAGE_KEY, LIMITS, WHATSAPP_NUMBER,
     unitPrice, lineSubtotal, totalPrice, formatPrice,
     emptyComposition, selectOption, setVariant, describeComposition,
-    parseQuantity, stepQuantity, totalBoxes, minimumMessage,
+    parseQuantity, stepQuantity, totalBoxes, emptyOrderMessage,
     emptyDetails, createState, saveLine, hasPendingBox, editLine, cancelEdit, removeLine, setLineQuantity,
     setDetail, isValidPhone, todayIso, formatDate, validateDetails, validateOrder,
-    buildMessage, buildWhatsAppUrl, serializeDraft, parseDraft,
+    buildMessage, buildWhatsAppUrl, prepareEmail, serializeDraft, parseDraft,
   });
 }));

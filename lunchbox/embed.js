@@ -24,7 +24,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     /* La box rejoint le flux, juste avant la quantité et le bouton d'ajout. */
     document.querySelector('.add-bar').before(document.getElementById('box-panel'));
-    document.querySelectorAll('a[href^="tel:"]').forEach((link) => link.setAttribute('target', '_top'));
+    document.querySelectorAll('a[href^="tel:"], a[href^="mailto:"]').forEach((link) => link.setAttribute('target', '_top'));
     /* null hors iframe ou si la page hôte est d'une autre origine : l'iframe garde alors son défilement. */
     if (window.frameElement) followHeight(window.frameElement);
   });

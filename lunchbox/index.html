@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="referrer" content="no-referrer">
   <title>Traiteur Tahraoui en collaboration avec Or Matrix</title>
-  <meta name="description" content="Composez vos lunch box à partir de 5 box et envoyez votre commande par WhatsApp à Traiteur Tahraoui.">
+  <meta name="description" content="Composez vos lunch box dès une seule box et envoyez votre commande par WhatsApp à Traiteur Tahraoui.">
   <meta name="theme-color" content="#034426">
   <link rel="icon" type="image/png" href="assets/logo-tahraoui.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,11 +35,17 @@
 
   <div class="wrap intro">
     <h1>Composez vos lunch box</h1>
-    <p>À partir de 5 box, pour les entreprises, chantiers, formations, foires et salons.</p>
+    <p>Commandez dès une seule box, pour les entreprises, chantiers, formations, foires et salons.</p>
     <p class="reminder">Chaque box comprend une entrée, une salade, un plat principal, une boisson, une bouteille d'eau et un dessert.</p>
+    <p class="contact">Vous pouvez aussi nous contacter et commander par téléphone au
+      <span class="nowrap"><a href="tel:+213549075773">05 49 07 57 73</a></span> ou au
+      <span class="nowrap"><a href="tel:+213564914203">05 64 91 42 03</a>,</span> ou par <span class="nowrap">e-mail</span> à
+      <span class="nowrap"><a href="mailto:ormatrixeurl@gmail.com">ormatrixeurl@gmail.com</a>.</span></p>
     <noscript>
-      <p class="noscript">La composition en ligne nécessite JavaScript. Vous pouvez aussi commander par téléphone au
-        <a href="tel:+213564914203">05 64 91 42 03</a>.</p>
+      <p class="noscript contact">La composition en ligne nécessite JavaScript. Vous pouvez nous contacter et commander par téléphone au
+        <span class="nowrap"><a href="tel:+213549075773">05 49 07 57 73</a></span> ou au
+        <span class="nowrap"><a href="tel:+213564914203">05 64 91 42 03</a>,</span> ou par <span class="nowrap">e-mail</span> à
+        <span class="nowrap"><a href="mailto:ormatrixeurl@gmail.com">ormatrixeurl@gmail.com</a>.</span></p>
     </noscript>
   </div>
 
@@ -53,7 +59,7 @@
           <label for="quantity">Nombre de box identiques</label>
           <div class="stepper">
             <button type="button" data-step="-1" aria-label="Une box de moins">&minus;</button>
-            <input id="quantity" type="number" inputmode="numeric" min="1" max="999" step="1" value="5" aria-describedby="quantity-error">
+            <input id="quantity" type="number" inputmode="numeric" min="1" max="999" step="1" value="1" aria-describedby="quantity-error">
             <button type="button" data-step="1" aria-label="Une box de plus">+</button>
           </div>
           <p class="error" id="quantity-error" aria-live="polite"></p>
@@ -71,7 +77,7 @@
         <ol id="order-lines" class="lines"></ol>
         <p id="order-total" class="total" aria-live="polite"></p>
         <p id="order-price" class="order-price" aria-live="polite"></p>
-        <p id="order-minimum" class="minimum" aria-live="polite" tabindex="-1"></p>
+        <p id="order-alert" class="order-alert" aria-live="polite" tabindex="-1"></p>
       </section>
 
       <section id="coordonnees" class="block" aria-labelledby="details-title">
@@ -109,6 +115,7 @@
           </div>
 
           <button type="submit" class="button primary send">Envoyer la commande sur WhatsApp</button>
+          <button type="button" id="email" class="button secondary send-email"><span>Envoyer la commande par <span class="nowrap">e-mail</span></span></button>
           <div class="pending" id="pending" role="group" aria-labelledby="pending-message" tabindex="-1" hidden>
             <p id="pending-message">Votre dernière box n'est pas encore dans la commande.</p>
             <div class="pending-actions">
@@ -120,10 +127,12 @@
           <p class="note">Votre commande est confirmée après notre réponse. Le total est indicatif, confirmé avec le devis.</p>
 
           <div class="fallback">
-            <p>Un problème avec WhatsApp ? Copiez votre commande ou appelez-nous.</p>
+            <p>WhatsApp ou votre messagerie ne s'ouvre pas ? Copiez votre commande, ou commandez par téléphone ou par e-mail.</p>
             <div class="fallback-actions">
               <button type="button" id="copy" class="button secondary">Copier la commande</button>
+              <a class="button secondary" href="tel:+213549075773">05 49 07 57 73</a>
               <a class="button secondary" href="tel:+213564914203">05 64 91 42 03</a>
+              <a class="button secondary email-address" href="mailto:ormatrixeurl@gmail.com">ormatrixeurl@gmail.com</a>
             </div>
             <p class="status" id="copy-status" role="status"></p>
             <div class="field" id="copy-manual" hidden>
@@ -140,7 +149,7 @@
     <aside class="box-panel" id="box-panel" aria-label="Aperçu de votre box">
       <button type="button" class="box-toggle" id="box-toggle" aria-expanded="false" aria-controls="box-body">
         <span class="box-toggle-text">
-          <strong id="box-progress">Votre box : 0 sur 5</strong>
+          <strong id="box-progress">Votre box : 0 choix sur 5</strong>
           <span id="box-summary">Choisissez votre box</span>
         </span>
         <span class="meter" id="box-meter" aria-hidden="true"></span>
