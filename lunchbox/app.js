@@ -122,6 +122,7 @@
     const hasLines = state.lines.length > 0;
     setText(byId('order-total'), hasLines ? `Total : ${total} box` : '');
     setText(byId('order-price'), hasLines ? `Total indicatif : ${Order.formatPrice(Order.totalPrice(state.lines))}` : '');
+    setText(byId('order-delivery'), Order.deliveryMessage(state.lines));
     setText(alert, message);
     if (!message) alert.classList.remove('is-error');
   }

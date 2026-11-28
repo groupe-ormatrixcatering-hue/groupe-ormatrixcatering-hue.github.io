@@ -10,6 +10,7 @@
   const QTY_MAX = 999;
   const DEFAULT_QTY = 1;
   const MAX_LINES = 15;
+  const FREE_DELIVERY_MIN = 3;
   const MAX_ENTREES = Menu.sections.find((s) => s.id === 'entree').max;
   /* La version change avec le format des compositions : les anciens brouillons sont laissés de côté. */
   const STORAGE_KEY = 'tahraoui-lunchbox-brouillon-v2';
@@ -113,6 +114,21 @@
   const totalBoxes = (lines) => lines.reduce((sum, line) => sum + line.quantity, 0);
 
   const emptyOrderMessage = (lines) => (lines.length === 0 ? 'Ajoutez au moins une box à votre commande.' : '');
+
+  /* ---------- Livraison : information seulement, aucune commande n'est bloquée ---------- */
+
+  const hasFreeDelivery = (lines) => totalBoxes(lines) >= FREE_DELIVERY_MIN;
+
+  function deliveryMessage(lines) {
+    if (lines.length === 0) return '';
+    if (hasFreeDelivery(lines)) return 'Livraison gratuite.';
+    return `Ajoutez encore ${FREE_DELIVERY_MIN - totalBoxes(lines)} box pour la livraison gratuite.`;
+  }
+
+  function deliveryTerms(lines) {
+    if (hasFreeDelivery(lines)) return 'Livraison : gratuite';
+    return `Livraison : gratuite à partir de ${FREE_DELIVERY_MIN} box, conditions confirmées avec le devis`;
+  }
 
   const emptyDetails = () => ({ societe: '', contact: '', telephone: '', date: '', lieu: '', remarques: '' });
 
@@ -273,6 +289,7 @@
       bold(`Total : ${totalBoxes(state.lines)} box`),
       bold(`Total indicatif : ${formatPrice(totalPrice(state.lines))}`),
       ESTIMATE_NOTICE,
+      deliveryTerms(state.lines),
       ...(notes ? ['', `Remarques : ${notes}`] : []),
     ].join('\n');
   }
@@ -353,7 +370,7 @@
     QTY_MIN, QTY_MAX, DEFAULT_QTY, MAX_LINES, MAX_ENTREES, STORAGE_KEY, LIMITS, WHATSAPP_NUMBER,
     unitPrice, lineSubtotal, totalPrice, formatPrice,
     emptyComposition, selectOption, setVariant, describeComposition,
-    parseQuantity, stepQuantity, totalBoxes, emptyOrderMessage,
+    parseQuantity, stepQuantity, totalBoxes, emptyOrderMessage, deliveryMessage,
     emptyDetails, createState, saveLine, hasPendingBox, editLine, cancelEdit, removeLine, setLineQuantity,
     setDetail, isValidPhone, todayIso, formatDate, validateDetails, validateOrder,
     buildMessage, buildWhatsAppUrl, prepareEmail, serializeDraft, parseDraft,

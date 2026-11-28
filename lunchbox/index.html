@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="referrer" content="no-referrer">
   <title>Traiteur Tahraoui en collaboration avec Or Matrix</title>
-  <meta name="description" content="Composez vos lunch box dès une seule box et envoyez votre commande par WhatsApp à Traiteur Tahraoui.">
+  <meta name="description" content="Composez vos lunch box dès une seule box et envoyez votre commande par WhatsApp à Traiteur Tahraoui. Livraison à Alger.">
   <meta name="theme-color" content="#034426">
   <link rel="icon" type="image/png" href="assets/logo-tahraoui.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,6 +36,10 @@
   <div class="wrap intro">
     <h1>Composez vos lunch box</h1>
     <p>Commandez dès une seule box, pour les entreprises, chantiers, formations, foires et salons.</p>
+    <p class="delivery">
+      <span>Livraison gratuite à partir de 3 box.</span>
+      <span>Lunch box disponibles uniquement à Alger.</span>
+    </p>
     <p class="reminder">Chaque box comprend une entrée, une salade, un plat principal, une boisson, une bouteille d'eau et un dessert.</p>
     <p class="contact">Vous pouvez aussi nous contacter et commander par téléphone au
       <span class="nowrap"><a href="tel:+213549075773">05 49 07 57 73</a></span> ou au
@@ -77,6 +81,7 @@
         <ol id="order-lines" class="lines"></ol>
         <p id="order-total" class="total" aria-live="polite"></p>
         <p id="order-price" class="order-price" aria-live="polite"></p>
+        <p id="order-delivery" class="order-delivery" aria-live="polite"></p>
         <p id="order-alert" class="order-alert" aria-live="polite" tabindex="-1"></p>
       </section>
 
@@ -105,8 +110,9 @@
             <p class="error" id="date-error" aria-live="polite"></p>
           </div>
           <div class="field">
-            <label for="lieu">Lieu de livraison</label>
-            <input id="lieu" name="lieu" type="text" maxlength="120" autocomplete="street-address" required aria-describedby="lieu-error">
+            <label for="lieu">Lieu de livraison à Alger</label>
+            <p class="note" id="lieu-hint">Nous livrons uniquement à Alger.</p>
+            <input id="lieu" name="lieu" type="text" maxlength="120" autocomplete="street-address" required aria-describedby="lieu-hint lieu-error">
             <p class="error" id="lieu-error" aria-live="polite"></p>
           </div>
           <div class="field">

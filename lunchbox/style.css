@@ -62,6 +62,8 @@ main:focus, #composer:focus { outline: none; }
 .intro { padding: 28px 0 20px; }
 .intro h1 { max-width: 16ch; margin-bottom: 10px; font-size: clamp(1.9rem, 1.2rem + 3.2vw, 3rem); font-weight: 800; letter-spacing: -.02em; color: var(--green-dark); }
 .intro p { max-width: 52ch; margin: 0; color: var(--muted); }
+.intro .delivery { max-width: 60ch; margin-top: 14px; padding: 10px 14px; background: var(--green-dark); border-radius: var(--radius); color: var(--white); font-weight: 700; }
+.delivery span { display: block; }
 .intro .reminder { max-width: 60ch; margin-top: 14px; padding: 10px 14px; background: var(--kraft-light); border-radius: var(--radius); color: var(--ink); font-weight: 600; }
 .noscript { margin-top: 16px !important; font-weight: 600; }
 .intro .contact { max-width: 60ch; margin-top: 10px; padding: 8px 14px; background: var(--white); border: 2px solid var(--green); border-radius: var(--radius); color: var(--ink); font-weight: 600; }
@@ -139,7 +141,8 @@ textarea { resize: vertical; }
 .line-parts { margin: 0 0 12px; padding: 0; list-style: none; font-size: .9rem; color: var(--muted); }
 .line-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .line-actions .stepper { flex-basis: 100%; }
-.line-actions > .button { flex: 1; }
+/* Le mot d'un bouton ne se coupe pas : faute de place, le bouton passe à la ligne. */
+.line-actions > .button { flex: 1 1 auto; white-space: nowrap; }
 @media (min-width: 600px) {
   .line-actions .stepper { flex-basis: auto; margin-right: auto; }
   .line-actions > .button { flex: none; }
@@ -148,12 +151,15 @@ textarea { resize: vertical; }
 .total:empty { margin: 0; }
 .order-price { margin: 0 0 12px; font-size: 1.25rem; font-weight: 800; }
 .order-price:empty { margin: 0; }
+.order-delivery { margin: 0 0 12px; font-weight: 700; color: var(--green-dark); }
+.order-delivery:empty { margin: 0; }
 .order-alert { margin: 0; padding: 10px 12px; background: var(--white); border-left: 4px solid var(--kraft); font-weight: 600; }
 .order-alert.is-error { border-left-color: var(--error); color: var(--error); }
 .order-alert:empty { padding: 0; border: 0; }
 
 .field { margin-bottom: 16px; }
 .field label { display: block; margin-bottom: 6px; font-weight: 600; }
+.field .note { margin-bottom: 6px; }
 .send, .send-email { width: 100%; margin: 8px 0; }
 .pending { margin: 8px 0 12px; padding: 14px; background: var(--white); border: 3px solid var(--kraft); border-radius: var(--radius); }
 .pending p { font-weight: 700; }
