@@ -15,7 +15,7 @@
   /* La version change avec le format des compositions : les anciens brouillons sont laissés de côté. */
   const STORAGE_KEY = 'tahraoui-lunchbox-brouillon-v2';
   const ESTIMATE_NOTICE = 'Le total est indicatif, confirmé avec le devis.';
-  const WHATSAPP_NUMBER = '213549075773';
+  const WHATSAPP_NUMBER = '213564914203';
   const LIMITS = Object.freeze({ societe: 60, contact: 60, telephone: 20, date: 10, lieu: 120, remarques: 300 });
   const MULTILINE_FIELD = 'remarques';
   const PHONE_PATTERN = /^0(?:[567]\d{8}|[234]\d{7})$/;
